@@ -1,0 +1,467 @@
+---
+title: "Supplementary Material 8: Seed Germination Over Latitude Notebook"
+author: "Withheld for review"
+output:
+  md_document:
+    variant: markdown_github
+  pdf_document: default
+  html_document:
+    df_print: paged
+---
+
+This is the notebook for all code used in the Seed Germination Over Latitude Project
+
+Submitted to Journal of Global Ecology and Biogeography
+
+#### Contents
+- Data cleaning and filtering
+- Germination models
+- Addition of climate data and additional filtering
+- Data analysis and figures:
+  - Figure 1: Hypotheses and data distribution [Not done in R]
+  - Figure 2: Single species records and model estimates (more info in S1)
+  - Figure 3a: Germination breadth over latitude analysis (results in S2)
+  - Figure 3b: Current climate mismatch over latitude analysis (results in S2)
+  - Figure 3c: Future warming risk over latitude analysis (results in S2)
+  - Figure 3:  combination of 3a, 3b, 3c
+  - Figure 4abcd: Growth form, longevity effect on future warming risk and climate mismatch (results in S2)
+  - Figure 5: Phylogentic tree with warming risk 
+- Additional analyses:
+  - Maximum, optima, and minimum germination temperatures over latitude
+  - Future (2070) climate mismatch over latitude
+  - Current warming risk over latitude
+  - Code used for this project (this document)
+- Other:
+  - Introduction analysis (Warming over latitude for 60N, 5N, 33S)
+
+***
+\pagebreak
+
+#### Load packages for this markdown file
+
+- We use 'dplyr', 'ggpubr' and 'metafor' in this document
+- 'knitr' and 'rmarkdown' are used to create the pdf and html versions
+
+```{r message = F, warning = F, eval = T}
+library(dplyr)
+library(ggpubr)
+library(metafor)
+```
+***
+
+#### Data Cleaning Methods
+
+- We start with data downloaded from the Millennium Seed Bank Project (MSBP)
+  - Downloaded 16/11/17 (Seed age data downloaded 26/09/19)
+  - Data sourced via Millennium Seed Bank Partnership Data Warehouse http://brahmsonline.kew.org/msbp 
+- Remove duplicates, negative germination IDs, rows with NumberSown = 0
+- Add in temperature information
+- Make new ID which is Grid.ID - Species_Genus_Lat_Long (Species*Site)
+- Number of records after initial cleaning: `r nrow(read.csv("./Outputs/Germ_Filtered.csv"))`
+- Number of different species after initial cleaning: `r nrow(distinct(read.csv("./Outputs/Germ_Filtered.csv"), Taxon_ID))`
+
+```{r eval=FALSE}
+source("./R/0_Data-Cleaning.R") #More info in script
+```
+***
+
+#### Perform Germination Models on each Species*Site
+
+- Details in script and in Supplement 1
+- Post model filtering in script
+
+```{r eval=FALSE}
+source("./R/1_Quadratic-Models.R") #More info in script
+```
+
+***
+
+#### Add Climate Data from WorldClim, and clean data for analysis
+- Current: "worldclim", var="bio", res=10
+- Future: 'CMIP5', var='bio', res=10, rcp=85, model='AC', year=70
+- Altitude from worldclim as well
+- Neaten up the dataset to allow for analyses
+- Number of species*sites after post model cleaning: `r nrow(read.csv("./Data/MSBP_Clean"))`
+- Number of different species after cleaning: `r nrow(distinct(read.csv("./Data/MSBP_Clean"), Taxon_ID))`
+- Number of records used to make final dataset: `r sum(read.csv("./Data/MSBP_Clean")$n)`
+
+```{r eval=FALSE}
+source("./R/2_Add-Climate-Data.R") #More info in script
+```
+
+***
+
+#### Data Analysis and Figures
+
+##### Figure 1. 
+- Hypothesised Germination Temperature Breadths, 
+- Map of Species Locations, 
+- Forecasted Temperature Increase
+- No code (not made in R)
+
+***
+
+##### Figure 2. 
+- Example of species records and model estimates 
+- Max, Topt upper, Topt lower, Min
+
+***
+
+
+##### Figure 3.a Germination Breadth over Latitude 
+- With phylogeny (with and without hemisphere)
+- Without phylogeny (with and without hemisphere)
+- Hemisphere not significant: 
+  - without phy p = `r readRDS("./Outputs/TB")$Model.h$pval[5]`
+  - with phy p = `r readRDS("./Outputs/TB")$Model.h.phy$pval[5]`
+- Plot (goes to combination plot)
+- Tables to Supp 2.
+  
+```{r warning=FALSE, eval=FALSE}
+source("./R/germToleranceBreadth.R") #Analysis script
+source("./R/metaforR2.R") #Allows for calculation of pseudo R-squared from metafor objects
+
+TB <- getToleranceBreadth(fromfile = T) #Set to T to not rerun everything, F to rerun
+
+#Abslat with phylogeny
+TB$Model.phy
+
+#R-squared marginal(fixed effects) and conditional (fixed and random effects)
+R2(TB$Model.phy)
+
+#Abslat without phylogeny
+TB$Model
+
+#R-squared marginal(fixed effects) and conditional (fixed and random effects)
+R2(TB$Model)
+```
+***
+  
+##### Figure 3.b Current Climate Mismatch over Latitude
+- With phylogeny (with and without hemisphere)
+- Without phylogeny (with and without hemisphere)
+- Hemisphere not significant: 
+  - without phy p = `r readRDS("./Outputs/CM_Current")$Model.h$pval[5]`
+  - with phy p = `r readRDS("./Outputs/CM_Current")$Model.h.phy$pval[5]`
+- Plot (goes to combination plot)
+- Tables to Supp 2.
+- In tropics:
+  - Above Topt.upp: `r nrow(filter(read.csv("./Data/MSBP_Clean"), CM.Current>0&AbsLat<23.5))`/`r nrow(filter(read.csv("./Data/MSBP_Clean"), !is.na(CM.Current) & AbsLat<23.5))`
+  - Within Topt breadth: `r nrow(filter(read.csv("./Data/MSBP_Clean"), CM.Current<0&(Current.Hot.Quart - Topt.low)>0&AbsLat<23.5))`/`r nrow(filter(read.csv("./Data/MSBP_Clean"), !is.na(CM.Current) & AbsLat<23.5))`
+- Outside tropics:
+  - Above Topt.upp: `r nrow(filter(read.csv("./Data/MSBP_Clean"), CM.Current>0&AbsLat>23.5))`/`r nrow(filter(read.csv("./Data/MSBP_Clean"), !is.na(CM.Current) & AbsLat>23.5))`
+  - Within Topt breadth: `r nrow(filter(read.csv("./Data/MSBP_Clean"), CM.Current<0&(Current.Hot.Quart - Topt.low)>0&AbsLat>23.5))`/`r nrow(filter(read.csv("./Data/MSBP_Clean"), !is.na(CM.Current) & AbsLat>23.5))`
+- Above 40:
+  - Above Topt.upp: `r nrow(filter(read.csv("./Data/MSBP_Clean"), CM.Current>0&AbsLat>40))`/`r nrow(filter(read.csv("./Data/MSBP_Clean"), !is.na(CM.Current) & AbsLat>40))`
+  - Within Topt breadth: `r nrow(filter(read.csv("./Data/MSBP_Clean"), CM.Current<0&(Current.Hot.Quart - Topt.low)>0&AbsLat>40))`/`r nrow(filter(read.csv("./Data/MSBP_Clean"), !is.na(CM.Current) & AbsLat>40))`
+  
+```{r warning=FALSE, message=TRUE, eval=FALSE}
+source("./R/germClimateMismatchCurrent.R")
+source("./R/metaforR2.R") #Allows for calculation of pseudo R-squared from metafor objects
+
+CM <- getCM(fromfile = T) #Set to T to get results from file, set to F to rerun analyses
+
+#Abslat with phylogeny
+CM$Model.phy
+
+#R-squared marginal(fixed effects) and conditional (fixed and random effects)
+R2(CM$Model.phy)
+
+#Abslat Without phylogeny
+CM$Model
+
+#R-squared marginal(fixed effects) and conditional (fixed and random effects)
+R2(CM$Model)
+
+#Species at 60N
+predict.rma(CM$Model, 
+            newmods=c(AbsLat = 60, 
+                      SeedAge = log10(1479), 
+                      altitude = 393), 
+            addx=T)
+
+#Species at 60N - lower
+predict.rma(CM$Model.low, 
+            newmods=c(AbsLat = 60, 
+                      SeedAge = log10(1479), 
+                      altitude = 393), 
+            addx=T)
+
+#Species at 5N
+predict.rma(CM$Model, 
+            newmods=c(AbsLat = 5, 
+                      SeedAge = log10(1479), 
+                      altitude = 393), 
+            addx=T)
+
+```
+***
+
+
+##### Figure 3.c- Future Warming Risk over Latitude
+- With phylogeny (with hemisphere)
+- Without phylogeny (with hemisphere)
+- Plot
+- In tropics:
+  - Above Tmax: `r nrow(filter(read.csv("./Data/MSBP_Clean"), WR.Future>0&AbsLat<23.5))`/`r nrow(filter(read.csv("./Data/MSBP_Clean"), !is.na(WR.Future) & AbsLat<23.5))`
+- Outside tropics:
+  - Above Tmax: `r nrow(filter(read.csv("./Data/MSBP_Clean"), WR.Future>0&AbsLat>23.5))`/`r nrow(filter(read.csv("./Data/MSBP_Clean"), !is.na(WR.Future) & AbsLat>23.5))`
+- Above 40:
+  - Above Tmax: `r nrow(filter(read.csv("./Data/MSBP_Clean"), WR.Future>0&AbsLat>40))`/`r nrow(filter(read.csv("./Data/MSBP_Clean"), !is.na(WR.Future) & AbsLat>40))`
+
+
+```{r warning=FALSE, eval=FALSE}
+source("./R/germWarmingRiskFuture.R")
+source("./R/metaforR2.R") #Allows for calculation of pseudo R-squared from metafor model objects
+
+WR <- getWR(fromfile = T) #Set to T to not rerun everything, set to F to rerun
+
+#Abslat and hemipshere with phylogeny
+WR$Model.h.phy
+
+#R-squared marginal(fixed effects) and conditional (fixed and random effects) 
+R2(WR$Model.h.phy)
+
+#Abslat and hemipshere without phylogeny
+WR$Model.h
+
+#R-squared marginal(fixed effects) and conditional (fixed and random effects)
+R2(WR$Model.h)
+
+#Species at 40N
+predict.rma(WR$Model.h, 
+            newmods=c(AbsLat = 40, 
+                      SeedAge = log10(1449), 
+                      altitude = 142, 
+                      NorthTF = TRUE), 
+            addx=T)
+
+#Species at 5N
+predict.rma(WR$Model.h, 
+            newmods=c(AbsLat = 5, 
+                      SeedAge = log10(1449), 
+                      altitude = 393, 
+                      NorthTF = TRUE), 
+            addx=T)
+```
+***
+
+##### Figure 3. Combined graphs (Figure 3 a, b, c) 
+
+```{r echo=FALSE, fig.width=7, fig.height=14, eval=FALSE}
+combPlot <-  ggarrange(
+  ggarrange(
+    annotate_figure(
+      TB$Plot + 
+        xlab(expression("Absolute Latitude "(degree))) ,
+      top = text_grob(
+        "Germination Tolerance Breadth",
+        rot = 0,
+        size = 16
+      )
+    ),
+    annotate_figure(
+      CM$Plot +
+        xlab(expression("Absolute Latitude "(degree))) ,
+      top = text_grob("Current Climate Mismatch", rot = 0, size = 16)
+    ),
+    ncol = 2,
+    nrow = 1,
+    labels = c("a", "b")
+  ),
+  annotate_figure(
+    WR$Plot +
+      xlab(expression("Latitude "(degree))) ,
+    top = text_grob("Future Warming Risk", rot = 0, size = 16)
+  ),
+  labels = c("a", "c"),
+  ncol = 1,
+  nrow = 2
+)
+
+combPlot
+
+ggsave(combPlot, filename = "./Outputs/combPlot.tiff", units="in", 
+       width=9, height=9, dpi=1000, compression = 'lzw')
+
+```
+***
+
+##### Figure 4a,b,c,d - Warming Risk longevity, , Current Climate Mismatch longevity, woodiness
+
+```{r warning=FALSE,eval=FALSE}
+source("./R/germLifeWoodWR.R")
+
+WR.wood.life$Wood.Model
+
+WR.wood.life$Wood.Model.Phy 
+
+WR.wood.life$Long.Model 
+
+WR.wood.life$Long.Model.Phy
+
+
+source("./R/germLifeWoodCM.R")
+
+CM.wood.life$Wood.Model
+
+CM.wood.life$Wood.Model.Phy 
+
+CM.wood.life$Long.Model 
+
+CM.wood.life$Long.Model.Phy
+
+
+source("./R/germLifeWoodTB.R")
+
+TB.wood.life$Wood.Model
+
+TB.wood.life$Wood.Model.Phy 
+
+TB.wood.life$Long.Model 
+
+TB.wood.life$Long.Model.Phy
+
+TB.wood.life$Wood.Plot
+
+TB.wood.life$Long.Plot
+
+f4combPlot <- ggarrange((WR.wood.life$Wood.Plot + theme(plot.margin = margin(10,30,10,30))),
+                        (WR.wood.life$Long.Plot + theme(plot.margin = margin(10,30,10,30))),
+                        (CM.wood.life$Wood.Plot + theme(plot.margin = margin(10,30,10,30))),
+                        (CM.wood.life$Long.Plot + theme(plot.margin = margin(10,30,10,30))), 
+                        labels = c("a", "b", "c", "d"), ncol=2, nrow=2)
+
+f4combPlot
+
+saveRDS(WR.wood.life, "./Outputs/woodlife")
+
+ggsave(f4combPlot, 
+       filename = "./Outputs/f4combPlot.tiff", 
+       units="in", 
+       width=12, height=8, dpi=1000, compression = 'lzw')
+```
+
+
+***
+
+##### Figure 5 - Warming Risk Phylogenetic Tree, and text for phylogenetic signal
+- Phylogentic tree show warming risk per species
+- Test for phylogenetic signal of future warming risk
+  - Moran's I: 
+  - Blomberg's K: 
+
+```{r warning=FALSE,eval=FALSE}
+source("./R/germTree.R") #Get tree - more detail in script
+source("./R/germPhyloSignal.R") #Get phylogentic signals - more detail in script
+
+pclades
+```
+
+***
+
+
+#### Appendices
+
+##### Maximum, upper optimum, lower optimum, and minimum germination temperatures over latitude
+
+```{r eval=FALSE}
+source("./R/germMaxMinOpt.R")
+```
+
+
+##### Future (2070) climate mismatch over latitude
+
+```{r eval=FALSE}
+source("./R/germClimateMismatchFuture.R")
+
+CMF$Plot
+
+CMF$Model.h.Phy
+```
+
+##### Current warming risk over latitude
+
+```{r eval=FALSE}
+source("./R/germWarmingRiskCurrent.R")
+
+WRC$Plot
+
+WR.c$Model.Phy
+```
+
+##### Data appendix
+
+
+```{r}
+MSBP <- read.csv(file = "./Data/MSBP_Clean")
+
+
+data_appendix <- MSBP %>%
+                 rename(Species.Location = Grid.ID,
+                        Species = Taxon_ID,
+                        Location = grid.ll,
+                        Latitude.grid = Grid.Lat,
+                        Longitude.grid = Grid.Long,
+                        n.Records = n) %>%
+                select(Species.Location,
+                       Species,
+                       Location,
+                       Latitude.grid,
+                       Longitude.grid,
+                       Tmax,
+                       SEmax,
+                       Tmin,
+                       SEmin,
+                       Topt,
+                       SEopt,
+                       Topt.upp,
+                       SEopt.upp,
+                       Topt.low,
+                       SEopt.low,
+                       Tbreadth,
+                       SEbreadth,
+                       Toptbreadth,
+                       SEoptbreadth,
+                       CM.Current,
+                       WR.Future,
+                       CM.Future,
+                       WR.Current,
+                       Altitude,
+                       SeedAge,
+                       n.Records)
+                
+
+library
+
+print.xtable(data_appendix)
+
+```
+
+
+Methods: We used `r sum(read.csv("./Data/MSBP_Clean")$n)` records for `r nrow(distinct(read.csv("./Data/MSBP_Clean"), Taxon_ID))` species from the Kew Gardens’ global germination database to quantify global patterns in germination temperature.
+Results: We found no evidence for a latitudinal gradient in the breadth of temperatures at which plant species can germinate. However, tropical plants are predicted to face the greatest risk from climate warming, because they experience temperatures closer to their upper germination limits. By 2070, over half (`r nrow(filter(read.csv("./Data/MSBP_Clean"), CM.Future>0&AbsLat<23.5))`/`r nrow(filter(read.csv("./Data/MSBP_Clean"), !is.na(CM.Future) & AbsLat<23.5))`) of tropical plant species are predicted to experience temperatures exceeding their optimum germination temperatures, with some even exceeding their maximum germination temperature (`r nrow(filter(read.csv("./Data/MSBP_Clean"), WR.Future>0&AbsLat<23.5))`/`r nrow(filter(read.csv("./Data/MSBP_Clean"), !is.na(WR.Future) & AbsLat<23.5))`). Conversely, (`r round(nrow(filter(read.csv("./Data/MSBP_Clean"), (Future.Hot.Quart-Topt.low)<0&AbsLat>45))/nrow(filter(read.csv("./Data/MSBP_Clean"), !is.na(CM.Future) & AbsLat>45))*100)`% of species at latitudes above 45° are predicted to benefit from warming, with environmental temperatures shifting closer to the species’ optimal germination temperatures.
+
+#### Other
+
+##### Intro Analysis
+
+- Warming over latitude script [./R/getWarmingPerLat.R](./R/getWarmingPerLat.R)
+  - Warming at: 
+    - 60N: `r (read.csv("./Outputs/difftable.csv"))[1,4]`
+    - 5N: `r (read.csv("./Outputs/difftable.csv"))[2,4]`
+    - 33S: `r (read.csv("./Outputs/difftable.csv"))[3,4]`
+- Using climate sources as above, averaged over 1 degree on latitude
+
+##### Methods Numbers
+
+- Records after duplicate records: 164 428
+- "We excluded `r 2275 - nrow(read.csv("./Data/MSBP_Clean"))` out of the 2275 species*location values..."
+- Tolerance breadth: `r nrow(readRDS("./Outputs/TB")$Plot$data)` species*locations, `r nrow(dplyr::distinct(readRDS("./Outputs/TB")$Plot$data, Taxon_ID))` species, `r nrow(dplyr::distinct(readRDS("./Outputs/TB")$Plot$data, grid.ll))` locations
+- Current climate mismatch: `r nrow(readRDS("./Outputs/CM_current")$Plot$data)` species*locations, `r nrow(dplyr::distinct(readRDS("./Outputs/CM_current")$Plot$data, Taxon_ID))` species, `r nrow(dplyr::distinct(readRDS("./Outputs/CM_current")$Plot$data, grid.ll))` locations
+- Future warming risk:  `r nrow(readRDS("./Outputs/WR_future")$Plot$data)` species*locations, `r nrow(dplyr::distinct(readRDS("./Outputs/WR_future")$Plot$data, Taxon_ID))` species, `r nrow(dplyr::distinct(readRDS("./Outputs/WR_future")$Plot$data, grid.ll))` locations
+- Woody: `r nrow(dplyr::filter(dplyr::distinct(readRDS("./Outputs/woodlife")$Wood.Plot$data, Taxon_ID, .keep_all =T), woodiness == "W"))`
+- Herbaceous: `r nrow(dplyr::filter(dplyr::distinct(readRDS("./Outputs/woodlife")$Wood.Plot$data, Taxon_ID, .keep_all = T), woodiness == "H"))`
+- Annual:`r nrow(dplyr::filter(dplyr::distinct(readRDS("./Outputs/woodlife")$Long.Plot$data, Taxon_ID, .keep_all =T), ann_per == "annual"))`
+- Perennial:`r nrow(dplyr::filter(dplyr::distinct(readRDS("./Outputs/woodlife")$Long.Plot$data, Taxon_ID, .keep_all =T), ann_per == "perennial"))`
+
