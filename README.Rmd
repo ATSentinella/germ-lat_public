@@ -121,7 +121,7 @@ source("./R/2_Add-Climate-Data.R") #More info in script
 source("./R/germToleranceBreadth.R") #Analysis script
 source("./R/metaforR2.R") #Allows for calculation of pseudo R-squared from metafor objects
 
-TB <- getToleranceBreadth(fromfile = T) #Set to T to not rerun everything, F to rerun
+TB <- getToleranceBreadth(fromfile = F) #Set to T to not rerun everything, F to rerun
 
 #Abslat with phylogeny
 TB$Model.phy
@@ -159,7 +159,7 @@ R2(TB$Model)
 source("./R/germClimateMismatchCurrent.R")
 source("./R/metaforR2.R") #Allows for calculation of pseudo R-squared from metafor objects
 
-CM <- getCM(fromfile = T) #Set to T to get results from file, set to F to rerun analyses
+CM <- getCM(fromfile = F) #Set to T to get results from file, set to F to rerun analyses
 
 #Abslat with phylogeny
 CM$Model.phy
@@ -214,7 +214,7 @@ predict.rma(CM$Model,
 source("./R/germWarmingRiskFuture.R")
 source("./R/metaforR2.R") #Allows for calculation of pseudo R-squared from metafor model objects
 
-WR <- getWR(fromfile = T) #Set to T to not rerun everything, set to F to rerun
+WR <- getWR(fromfile = F) #Set to T to not rerun everything, set to F to rerun
 
 #Abslat and hemipshere with phylogeny
 WR$Model.h.phy
