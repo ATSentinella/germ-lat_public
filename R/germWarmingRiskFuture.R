@@ -48,7 +48,7 @@ getWR <- function(fromfile = T) {
     control = list(optimizer = "optim", optmethod = "Nelder-Mead")
   )
   
-  summary(WR.h.phy) #Hemisphere effect (p = 0.02), no interaction effects 
+  summary(WR.h.phy) #Hemisphere effect (p <.00001)
   
   ## Future Warming Risk ~ Latitude and Hemispshere (with phylogeny)
   #WR, using random effect of phylo, site (grid.ll) and species (Taxon_ID), and altitude  
@@ -61,12 +61,12 @@ getWR <- function(fromfile = T) {
     data = MSBP.WR.data
   )
   
-  summary(WR.h) #Hemisphere effect (p = 0.02)
+  summary(WR.h) #Hemisphere effect (p <.0001)
 
 
-#Plot of future WR with lat and hemisphere effect, no interaction effects 
+#Plot of future WR with lat and hemisphere effect
   
-WR.plot.f <- ggplot(data = MSBP.WR.data , aes(x = Latitude)) +
+WR.plot.f <- ggplot(data = MSBP.WR.data , aes(x = Grid.Lat)) +
     geom_rect(aes(
       xmin = -23.5,
       xmax = 23.5,
@@ -83,14 +83,14 @@ WR.plot.f <- ggplot(data = MSBP.WR.data , aes(x = Latitude)) +
     xlab(expression("Absolute Latitude "(degree))) +
   scale_alpha_continuous(range = c(0.4,1))+
     theme(legend.position = "none", plot.margin = margin(10,10,10,30))+
-     scale_x_continuous(limits = c(-60,64), expand = c(0,0))
+     scale_x_continuous(limits = c(-60,70), expand = c(0,0))
   
   WR.plot.f
 
   #Values to get confidence intervals
   mods <- cbind(AbsLat = c(0:70, 0:70), 
-                SeedAge= rep(log10(1479), 142),
-                altitude= rep(393, 142),
+                SeedAge= rep(log10(2119), 142),
+                altitude= rep(718, 142),
                 NorthTF= c(rep(T, 71), rep(F, 71)))
   
   ### calculate predicted values from model
@@ -104,24 +104,24 @@ WR.plot.f <- ggplot(data = MSBP.WR.data , aes(x = Latitude)) +
   
   #Plot original figure with confidence intervals from above
   WR.plot.f <-  WR.plot.f +
-    geom_line(data = filter(ci.plot1, V1 > -53 & V1 < 1),
+    geom_line(data = filter(ci.plot1, V1 > -52 & V1 < 1),
               aes(x = V1, y = (V2)),
               colour = "red",
               linetype = "solid") + #South
-    geom_line(data = filter(ci.plot1, V1 > -53 & V1 < 1),
+    geom_line(data = filter(ci.plot1, V1 > -52 & V1 < 1),
               aes(x = V1, y = (V3)),
               linetype = "dashed") + #South
-    geom_line(data = filter(ci.plot1, V1 > -53 & V1 < 1),
+    geom_line(data = filter(ci.plot1, V1 > -52 & V1 < 1),
               aes(x = V1, y = (V4)),
               linetype = "dashed") + #South
-    geom_line(data = filter(ci.plot1, V1 > -1 & V1 < 64),
+    geom_line(data = filter(ci.plot1, V1 > -1 & V1 < 65),
               aes(x = V1, y = (V2)),
               colour = "red",
               linetype = "solid") + #North
-    geom_line(data = filter(ci.plot1, V1 > -1 & V1 < 64),
+    geom_line(data = filter(ci.plot1, V1 > -1 & V1 < 65),
               aes(x = V1, y = (V3)),
               linetype = "dashed") + #North
-    geom_line(data = filter(ci.plot1, V1 > -1 & V1 < 64),
+    geom_line(data = filter(ci.plot1, V1 > -1 & V1 < 65),
               aes(x = V1, y = (V4)),
               linetype = "dashed") + #North
     xlab("Latitude (°)")
