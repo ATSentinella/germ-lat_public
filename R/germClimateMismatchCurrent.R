@@ -41,7 +41,7 @@ CM.h <- rma.mv(
   method = "REML",
   data = MSBP.CM
 )
-CM.h #no effect of hemisphere, so repeat without
+CM.h #significant effect of hemisphere (p = 0.0008)
 
 ## Current Climate Mismatch ~ Latitude and Hemispshere
 # additional fixed effects of log10(SeedAge) and altitude
@@ -61,54 +61,11 @@ CM.h.phy <- rma.mv(
   digits = 5,
   control = list(optimizer = "optim", optmethod = "Nelder-Mead")
 )
-CM.h.phy #no effect of hemisphere, so repeat without
+CM.h.phy #significant effect of hemisphere (p = 0.01543)
 
-## Current Climate Mismatch ~ Latitude
-# additional fixed effects of log10(SeedAge) and altitude
-# using random effect of site (grid.ll) and species (Taxon_ID)
-# and phylogeny with corresponding correlation matrix
-CM.phy <- rma.mv(
-  yi = Current.Hot.Quart - Topt.upp,
-  V = vi,
-  mod = ~ AbsLat + log10(SeedAge) + altitude,
-  random = list( ~ 1 | phylo, 
-                 ~ 1 | Taxon_ID, 
-                 ~ 1 | grid.ll),
-  R = list(phylo = MSBP.CM.phy$cor),
-  method = "REML",
-  data = MSBP.CM.phy[[1]]
-)
-CM.phy #no interactions with abslat 
-
-## Current Climate Mismatch ~ Latitude and Hemispshere
-# additional fixed effects of log10(SeedAge) and altitude
-# using random effect of site (grid.ll) and species (Taxon_ID)
-CM <- rma.mv(
-  yi = Current.Hot.Quart - Topt.upp,
-  V = vi,
-  mod = ~ AbsLat + log10(SeedAge) + altitude,
-  random = list( ~ 1 | Taxon_ID, 
-                 ~ 1 | grid.ll),
-  method = "REML",
-  data = MSBP.CM
-)
-
-
-CM.low <- rma.mv(
-  yi = Current.Hot.Quart - Topt.low,
-  V = vi,
-  mod = ~ AbsLat + log10(SeedAge) + altitude,
-  random = list( ~ 1 | Taxon_ID, 
-                 ~ 1 | grid.ll),
-  method = "REML",
-  data = MSBP.CM
-)
-
-CM #no interactions with abslat 
-
-CM.plot <- ggplot(data = MSBP.CM , aes(x = AbsLat)) +
+CM.plot <- ggplot(data = MSBP.CM , aes(x = Grid.Lat)) +
   geom_rect(aes(
-    xmin = 0, xmax = 23.5,
+    xmin = -23.5, xmax = 23.5,
     ymax = Inf, ymin = -Inf
   ), fill = "grey90") +
     geom_hline(aes(yintercept = 0), size = 0.5) +
@@ -126,39 +83,49 @@ CM.plot <- ggplot(data = MSBP.CM , aes(x = AbsLat)) +
   theme(legend.position = "none",
         plot.margin = margin(10, 10, 10, 30)) +
     scale_alpha_continuous(range = c(0.4,1))+
-  scale_x_continuous(limits = c(0, 60), expand = c(0, 0))
+  scale_x_continuous(limits = c(-55, 65), expand = c(0, 0))
 
 
  CM.plot 
 
  
 #Values to get confidence intervals
-mods <- cbind(AbsLat = c(1:57), 
-              SeedAge= rep(log10(1479), 57),
-              altitude= rep(393, 57)) #abslat - 1 to 57
+mods <- cbind(AbsLat = c(0:70, 0:70), 
+              SeedAge= rep(log10(2449), 142),
+              altitude= rep(678, 142),
+              NorthTF= c(rep(T, 71), rep(F, 71)))
 
 ### calculate predicted values from model
-preds1 <- predict(CM, newmods=mods, addx=T)
+preds1 <- predict(CM.h, newmods=mods, addx=T)
 
 ci.plot1 <- as.data.frame(
-  cbind(c(seq(1, 57)), 
+  cbind(c(0:70, 0:(-70)), 
         preds1[[1]],
         preds1[[3]], 
-        preds1[[4]])) %>%
-  filter(V1 > 0)
+        preds1[[4]]))
 
 #Plot original figure with confidence intervals from above
 CM.plot <-  CM.plot +
-  geom_line(data = ci.plot1,
+  geom_line(data = filter(ci.plot1, V1 > -53 & V1 < 1),
             aes(x = V1, y = (V2)),
             colour = "orange",
-            linetype = "solid") +
-  geom_line(data = ci.plot1,
+            linetype = "solid") + #South
+  geom_line(data = filter(ci.plot1, V1 > -53 & V1 < 1),
             aes(x = V1, y = (V3)),
-            linetype = "dashed") +
-  geom_line(data = ci.plot1,
+            linetype = "dashed") + #South
+  geom_line(data = filter(ci.plot1, V1 > -53 & V1 < 1),
             aes(x = V1, y = (V4)),
-            linetype = "dashed") +
+            linetype = "dashed") + #South
+  geom_line(data = filter(ci.plot1, V1 > -1 & V1 < 63),
+            aes(x = V1, y = (V2)),
+            colour = "orange",
+            linetype = "solid") + #North
+  geom_line(data = filter(ci.plot1, V1 > -1 & V1 < 63),
+            aes(x = V1, y = (V3)),
+            linetype = "dashed") + #North
+  geom_line(data = filter(ci.plot1, V1 > -1 & V1 < 63),
+            aes(x = V1, y = (V4)),
+            linetype = "dashed") + #North
   xlab("Latitude (°)")
 
 CM.plot
