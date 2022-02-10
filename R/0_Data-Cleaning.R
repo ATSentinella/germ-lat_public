@@ -49,18 +49,20 @@ Accession <- bind_cols(MSBP_DL1, MSBP_DL2)
 Germ <- bind_cols(MSBP_DL3, MSBP_DL4, MSBP_DL5, MSBP_DL6, MSBP_DL7)
 
 #Save Raw, combined data - Accession
-Accession_Raw <- select(Accession,-AccessionNumber1)
+Accession_Raw <- select(Accession,-AccessionNumber...7) %>%
+  rename(AccessionNumber = AccessionNumber...1)
 write.csv(Accession_Raw, file = "./Data/Accession_Raw.csv")
 
 #Save Raw, combined data - Germination
 Germ_Raw <-
   select(
     Germ,
-    -BrahmsGermTestId1,
-    -BrahmsGermTestId2,
-    -BrahmsGermTestId3,
-    -BrahmsGermTestId4
-  )
+    -BrahmsGermTestId...4,
+    -BrahmsGermTestId...9,
+    -BrahmsGermTestId...12,
+    -BrahmsGermTestId...17
+  ) %>%
+  rename(BrahmsGermTestId = BrahmsGermTestId...2)
 write.csv(Germ_Raw, file = "./Data/Germ_Raw.csv")
 
 
@@ -133,9 +135,9 @@ Germ_Cleaning <-
   left_join(Germ_Cleaning, countgerm, by = "BrahmsGermTestId")
 
 #Removed GermIds with different NumGerms, can't be sure which is correct 
-Germ_Cleaning <- filter(Germ_Cleaning, nn == 1)
+Germ_Cleaning <- filter(Germ_Cleaning, n.y == 1)
 
-Germ_Cleaning <- select(Germ_Cleaning,-n,-nn)
+Germ_Cleaning <- select(Germ_Cleaning,-n.x,-n.y)
 
 # Add in temperature information
 #
