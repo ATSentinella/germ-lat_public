@@ -15,7 +15,7 @@ getClimateData <- function() {
                      var = "bio",
                      res = 10,
                      path = "./")
-  Current <- Current[[c(1, 8)]]
+  Current <- Current[[c(1, 10)]]
   names(Current) <- c("Current.Temp", "Current.Temp.Hot.Quart")
   
   # weighted means of each polygon, removes NAs first, takes a long time
@@ -34,7 +34,7 @@ getClimateData <- function() {
       model = 'AC',
       year = 70,
       path = "./")
-  Future85 <- Future85[[c(1, 8)]]
+  Future85 <- Future85[[c(1, 10)]]
   names(Future85) <- c("Future.Temp", "Future.Temp.Hot.Quart")
   
   coords <- dplyr::select(MSBP, one_of(c("Longitude", "Latitude"))) %>%
