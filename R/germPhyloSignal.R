@@ -19,7 +19,7 @@ MSBP.tree <- MSBP %>%
              filter(!is.na(Tmax) & #Filter where Tmax and Future.Hot.Quart is not NA
                     !is.na(Future.Hot.Quart) &
                     SEmax < 200) %>% #and SEmax is lower than 200
-             mutate(WR = Future.Hot.Quart - SEmax) %>% #Create FWT variable
+             mutate(WR = Future.Hot.Quart - Tmax) %>% #Create FWT variable
              distinct(Taxon_ID, .keep_all = T)
 
 
