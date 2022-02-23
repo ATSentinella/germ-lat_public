@@ -388,7 +388,7 @@ source("./R/germWarmingRiskCurrent.R")
 
 WRC$Plot
 
-WR.c$Model.Phy
+WRC$Model.phy
 ```
 
 ##### Data appendix
