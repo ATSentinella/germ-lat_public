@@ -162,34 +162,37 @@ source("./R/metaforR2.R") #Allows for calculation of pseudo R-squared from metaf
 CM <- getCM(fromfile = F) #Set to T to get results from file, set to F to rerun analyses
 
 #Abslat with phylogeny
-CM$Model.phy
+CM$Model.h.phy
 
 #R-squared marginal(fixed effects) and conditional (fixed and random effects)
-R2(CM$Model.phy)
+R2(CM$Model.h.phy)
 
 #Abslat Without phylogeny
-CM$Model
+CM$Model.h
 
 #R-squared marginal(fixed effects) and conditional (fixed and random effects)
-R2(CM$Model)
+R2(CM$Model.h)
 
 #Species at 60N
-predict.rma(CM$Model, 
-            newmods=c(AbsLat = 60, 
+predict.rma(CM$Model.h, 
+            newmods=c(AbsLat = 60,
+                      NorthTF = T,
                       SeedAge = log10(1479), 
                       altitude = 393), 
             addx=T)
 
 #Species at 60N - lower
-predict.rma(CM$Model.low, 
-            newmods=c(AbsLat = 60, 
+predict.rma(CM$Model.low.h, 
+            newmods=c(AbsLat = 60,
+                      NorthTF = T,
                       SeedAge = log10(1479), 
                       altitude = 393), 
             addx=T)
 
 #Species at 5N
-predict.rma(CM$Model, 
-            newmods=c(AbsLat = 5, 
+predict.rma(CM$Model.h, 
+            newmods=c(AbsLat = 5,
+                      NorthTF = T,
                       SeedAge = log10(1479), 
                       altitude = 393), 
             addx=T)

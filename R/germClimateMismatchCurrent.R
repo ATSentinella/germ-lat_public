@@ -63,6 +63,17 @@ CM.h.phy <- rma.mv(
 )
 CM.h.phy #significant effect of hemisphere (p = 0.01543)
 
+
+CM.low.h <- rma.mv(
+  yi = Current.Hot.Quart - Topt.low,
+  V = vi,
+  mod = ~ AbsLat + (AbsLat:NorthTF)  + log10(SeedAge) + altitude,
+  random = list( ~ 1 | Taxon_ID,
+                 ~ 1 | grid.ll),
+  method = "REML",
+  data = MSBP.CM
+)
+
 CM.plot <- ggplot(data = MSBP.CM , aes(x = Grid.Lat)) +
   geom_rect(aes(
     xmin = -23.5, xmax = 23.5,
@@ -145,7 +156,7 @@ output <- list(
   Plot = CM.plot,
   Model.h = CM.h,
   Model.h.phy = CM.h.phy,
-  Model.low = CM.low
+  Model.low.h = CM.low.h
 )
 
 saveRDS(output, "./Outputs/CM_current")
