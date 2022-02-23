@@ -430,9 +430,6 @@ data_appendix <- MSBP %>%
                        Altitude,
                        SeedAge,
                        n.Records)
-                
-
-library
 
 print.xtable(data_appendix)
 
