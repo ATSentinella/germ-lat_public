@@ -18,7 +18,7 @@ model.tables <- list()
 
 
 
-if (length(models)>3) {
+if (length(models)>4) {
   model.tables[[1]] <- getGermTable(models[[5]], 
                                     paste(model.name, 
                                           "over Absolute Latitude and Hemisphere (with Phylogeny)",

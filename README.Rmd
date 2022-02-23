@@ -432,7 +432,11 @@ data_appendix <- MSBP %>%
                        SeedAge,
                        n.Records)
 
-print.xtable(data_appendix)
+data_tex <- xtable::print.xtable(xtable::xtable(data_appendix), 
+                                 print.results = T, 
+                                 file= "Outputs/data-appendix.tex")
+
+
 
 ```
 

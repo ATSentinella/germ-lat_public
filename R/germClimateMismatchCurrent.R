@@ -153,9 +153,9 @@ ggsave(
 
 
 output <- list(
-  Plot = CM.plot,
   Model.h = CM.h,
   Model.h.phy = CM.h.phy,
+  Plot = CM.plot,
   Model.low.h = CM.low.h
 )
 
