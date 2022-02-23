@@ -41,7 +41,8 @@ if (length(models)>4) {
                                         "over Absolute Latitude and Hemisphere (with Phylogeny)",
                                         "n =", models[[2]]$k))
   model.tables[[2]] <- getGermTable(models[[1]], 
-                                    paste(model.name, "over Absolute Latitude and Hemisphere (with Phylogeny)",
+                                    paste(model.name, 
+                                          "over Absolute Latitude and Hemisphere (without Phylogeny)",
                                         "n =", models[[1]]$k))
 }
 
@@ -73,6 +74,34 @@ S2_Tables[[13]] <- getGermTable(WR.wood.life$Long.Model.Phy,
 S2_Tables[[14]] <- getGermTable(WR.wood.life$Long.Model, 
                                 paste("Future Warming Risk by longevity (without Phylogeny)",
                                     "n =", WR.wood.life$Long.Model$k))
+S2_Tables[[15]] <- getGermTable(CM.wood.life$Wood.Model.Phy, 
+                                paste("Current Climate Mismatch by growth form (with Phylogeny)",
+                                      "n =", CM.wood.life$Wood.Model.Phy$k))
+S2_Tables[[16]] <- getGermTable(CM.wood.life$Wood.Model, 
+                                paste("Current Climate Mismatch by growth form (without Phylogeny)",
+                                      "n =", CM.wood.life$Wood.Model$k))
+S2_Tables[[17]] <- getGermTable(CM.wood.life$Long.Model.Phy, 
+                                paste("Current Climate Mismatch by longevity (with Phylogeny)",
+                                      "n =", CM.wood.life$Long.Model.Phy$k))
+S2_Tables[[18]] <- getGermTable(CM.wood.life$Long.Model, 
+                                paste("Current Climate Mismatch by longevity (without Phylogeny)",
+                                      "n =", CM.wood.life$Long.Model$k))
+S2_Tables[[19]] <- getGermTable(TB.wood.life$Wood.Model.Phy, 
+                                paste("Tolerance Breadth by growth form (with Phylogeny)",
+                                      "n =", TB.wood.life$Wood.Model.Phy$k))
+S2_Tables[[20]] <- getGermTable(TB.wood.life$Wood.Model, 
+                                paste("Tolerance Breadth by growth form (without Phylogeny)",
+                                      "n =", TB.wood.life$Wood.Model$k))
+S2_Tables[[21]] <- getGermTable(TB.wood.life$Long.Model.Phy, 
+                                paste("Tolerance Breadth by longevity (with Phylogeny)",
+                                      "n =", TB.wood.life$Long.Model.Phy$k))
+S2_Tables[[22]] <- getGermTable(TB.wood.life$Long.Model, 
+                                paste("Tolerance Breadth by longevity (without Phylogeny)",
+                                      "n =", TB.wood.life$Long.Model$k))
 saveRDS(S2_Tables, "S2_Tables")
 
-write(S2_Tables, "./Outputs/S2_Tables.txt")
+S2_Tables <- append(flatten(S2_Tables[c(1:10)]), S2_Tables[c(11:22)])
+
+add_table <- function(x) print.xtable(x, append = T, file = "Outputs/model_tables.tex")
+
+walk(S2_Tables, add_table)
