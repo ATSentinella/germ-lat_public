@@ -89,9 +89,9 @@ WR.plot.f <- ggplot(data = MSBP.WR.data , aes(x = Grid.Lat)) +
 
   #Values to get confidence intervals
   mods <- cbind(AbsLat = c(0:70, 0:70), 
-                SeedAge= rep(log10(2119), 142),
-                altitude= rep(718, 142),
-                NorthTF= c(rep(T, 71), rep(F, 71)))
+                SeedAge= rep(log10(median(MSBP.WR.data$SeedAge)), 142),
+                altitude= rep(median(MSBP.WR.data$altitude), 142),
+                NorthTF= c(0:70, rep(FALSE, 71)))
   
   ### calculate predicted values from model
   preds1 <- predict(WR.h, newmods=mods, addx=T)
@@ -132,8 +132,8 @@ ggsave(
   WR.plot.f,
   filename = "./Outputs/WRSE.tiff",
   units = "in",
-  width = 4,
-  height = 5,
+  width = 8,
+  height = 4,
   dpi = 1000,
   compression = 'lzw')
 
