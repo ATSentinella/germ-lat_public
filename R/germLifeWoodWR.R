@@ -127,13 +127,33 @@ wood.mv.WT <- rma.mv(yi = Future.Hot.Quart - Tmax,
                      method = "REML", 
                      data = MSBP.meta.wood)
 
+
+## Future warming risk ~ woodiness and lat (with phylogeny)
+wood.mv.WT.phy.lat <- rma.mv(yi = Future.Hot.Quart - Tmax, 
+                             V = vi, 
+                             mod = ~AbsLat + woodiness + woodiness:AbsLat +log10(SeedAge) + altitude,
+                             random = list(~1 | Taxon_ID, ~1 | grid.ll, ~1 | phylo),
+                             R = list(phylo = MSBP.tree.cor.wood$cor),
+                             method = "REML", 
+                             data = MSBP.tree.cor.wood$MSBP.tree, verbose=F, digits=5, 
+                             control=list(optimizer = "optim", optmethod = "Nelder-Mead", maxit= 10000))
+
+## Future warming risk ~ woodiness and lat (without phylogeny)
+wood.mv.WT.lat <- rma.mv(yi = Future.Hot.Quart - Tmax, 
+                         V = vi, 
+                         mod = ~AbsLat + woodiness + woodiness:AbsLat + log10(SeedAge) + altitude,
+                         random = list(~1 | Taxon_ID, ~1 | grid.ll),
+                         method = "REML", 
+                         data = MSBP.meta.wood)
+
+
 #Boxplot comparing woody and herbaceous species
 woodbox <- ggplot(data = MSBP.meta.wood, aes(x = woodiness, y = Future.Hot.Quart - Tmax)) +
             geom_boxplot(fill = "orchid") + 
             theme_classic()+
             ylab(expression("Predicted 2070 Environment Temperature - \n Maximum Germination Temperature ",(degree*C)))+
             xlab("") +
-            ylim(-45, 10) +
+            ylim(-40, 20) +
             scale_x_discrete(breaks=c("W", "H"),  labels=c("Woody", "Herbaceous"))+
             theme(legend.position="none", plot.margin = margin(10,10,10,30))
 
@@ -169,13 +189,33 @@ long.mv.WT <- rma.mv(yi = Future.Hot.Quart - Tmax,
                      data = MSBP.meta.long)
 
 
+## Future warming risk ~ Longevity and lat (with phylogeny)
+long.mv.WT.phy.lat <- rma.mv(yi = Future.Hot.Quart - Tmax, 
+                         V = vi, 
+                         mod = ~AbsLat + ann_per + ann_per:AbsLat +log10(SeedAge) + altitude,
+                         random = list(~1 | Taxon_ID, ~1 | grid.ll, ~1 | phylo),
+                         R = list(phylo = MSBP.tree.cor$cor),
+                         method = "REML", 
+                         data = MSBP.tree.cor$MSBP.tree, verbose=F, digits=5, 
+                         control=list(optimizer = "optim", optmethod = "Nelder-Mead", maxit= 10000))
+
+## Future warming risk ~ Longevity and lat (without phylogeny)
+long.mv.WT.lat <- rma.mv(yi = Future.Hot.Quart - Tmax, 
+                     V = vi, 
+                     mod = ~AbsLat + ann_per + ann_per:AbsLat + log10(SeedAge) + altitude,
+                     random = list(~1 | Taxon_ID, ~1 | grid.ll),
+                     method = "REML", 
+                     data = MSBP.meta.long)
+
+
+
 #Boxplot comparing woody and herbaceous species
 longbox <- ggplot(data = MSBP.meta.long, aes(x = ann_per, y = Future.Hot.Quart - Tmax)) +
             geom_boxplot(fill = "orchid") + 
             theme_classic()+
             ylab(expression("Predicted 2070 Environment Temperature - \n Maximum Germination Temperature ",(degree*C)))+
             xlab("") +
-            ylim(-45, 10) +
+            ylim(-40, 20) +
             scale_x_discrete(breaks=c("annual", "perennial"),  labels=c("Annual", "Perennial"))+
             theme(legend.position="none", plot.margin = margin(10,10,10,30))
 
@@ -185,7 +225,11 @@ output <- list(Wood.Model = wood.mv.WT,
                  Wood.Plot = woodbox,
                  Long.Model = long.mv.WT,
                  Long.Model.Phy = long.mv.WT.phy,
-                 Long.Plot = longbox)
+                 Long.Plot = longbox,
+                 wood.mv.WT.phy.lat = wood.mv.WT.phy.lat,
+                 wood.mv.WT.lat = wood.mv.WT.lat,
+                 long.mv.WT.phy.lat = long.mv.WT.phy.lat,
+                 long.mv.WT.lat = long.mv.WT.lat)
 
 return(output)
 

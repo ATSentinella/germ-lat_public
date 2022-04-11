@@ -127,6 +127,26 @@ wood.mv.CM <- rma.mv(yi = Current.Hot.Quart - Topt.upp,
                      method = "REML", 
                      data = MSBP.meta.wood)
 
+
+## Current Climate Mismatch ~ Woodiness and lat (with phylogeny)
+wood.mv.CM.phy.lat <- rma.mv(yi = Current.Hot.Quart - Topt.upp, 
+                         V = vi, 
+                         mod = ~AbsLat + woodiness + woodiness:AbsLat + log10(SeedAge) + altitude,
+                         random = list(~1 | Taxon_ID, ~1 | grid.ll, ~1 | phylo),
+                         R = list(phylo = MSBP.tree.cor.wood$cor),
+                         method = "REML", 
+                         data = MSBP.tree.cor.wood$MSBP.tree, verbose=F, digits=5, 
+                         control=list(optimizer = "optim", optmethod = "Nelder-Mead", maxit= 10000))
+
+## Current Climate Mismatch ~ Woodiness  and lat (without phylogeny)
+wood.mv.CM.lat <- rma.mv(yi = Current.Hot.Quart - Topt.upp, 
+                     V = vi, 
+                     mod = ~AbsLat + woodiness + woodiness:AbsLat + log10(SeedAge) + altitude,
+                     random = list(~1 | Taxon_ID, ~1 | grid.ll),
+                     method = "REML", 
+                     data = MSBP.meta.wood)
+
+
 #Boxplot comparing woody and herbaceous species
 woodbox <- ggplot(data = MSBP.meta.wood, aes(x = woodiness, y = Current.Hot.Quart - Topt.upp)) +
             geom_boxplot(fill = "springgreen1") + 
@@ -163,7 +183,25 @@ long.mv.CM.phy <- rma.mv(yi = Current.Hot.Quart - Topt.upp,
 ## Current Climate Mismatch ~ Longevity only (without phylogeny)
 long.mv.CM <- rma.mv(yi = Current.Hot.Quart - Topt.upp, 
                      V = vi, 
-                     mod = ~ann_per  + log10(SeedAge) + altitude,
+                     mod = ~ann_per + log10(SeedAge) + altitude,
+                     random = list(~1 | Taxon_ID, ~1 | grid.ll),
+                     method = "REML", 
+                     data = MSBP.meta.long)
+
+## Current Climate Mismatch  ~ Longevity and AbsLat (with phylogeny)
+long.mv.CM.phy.lat <- rma.mv(yi = Current.Hot.Quart - Topt.upp, 
+                         V = vi, 
+                         mod = ~AbsLat + ann_per + ann_per:AbsLat +log10(SeedAge) + altitude,
+                         random = list(~1 | Taxon_ID, ~1 | grid.ll, ~1 | phylo),
+                         R = list(phylo = MSBP.tree.cor$cor),
+                         method = "REML", 
+                         data = MSBP.tree.cor$MSBP.tree, verbose=F, digits=5, 
+                         control=list(optimizer = "optim", optmethod = "Nelder-Mead", maxit= 10000))
+
+## Current Climate Mismatch ~ Longevity and AbsLat (without phylogeny)
+long.mv.CM.lat <- rma.mv(yi = Current.Hot.Quart - Topt.upp, 
+                     V = vi, 
+                     mod = ~AbsLat + ann_per + ann_per:AbsLat  + log10(SeedAge) + altitude,
                      random = list(~1 | Taxon_ID, ~1 | grid.ll),
                      method = "REML", 
                      data = MSBP.meta.long)
@@ -185,7 +223,11 @@ output <- list(Wood.Model = wood.mv.CM,
                  Wood.Plot = woodbox,
                  Long.Model = long.mv.CM,
                  Long.Model.Phy = long.mv.CM.phy,
-                 Long.Plot = longbox)
+                 Long.Plot = longbox,
+                 wood.mv.CM.phy.lat = wood.mv.CM.phy.lat,
+                 wood.mv.CM.lat = wood.mv.CM.lat,
+                 long.mv.CM.phy.lat = long.mv.CM.phy.lat,
+                 long.mv.CM.lat = long.mv.CM.lat)
 
 return(output)
 
