@@ -102,9 +102,9 @@ CM.plot <- ggplot(data = MSBP.CM , aes(x = Grid.Lat)) +
  
 #Values to get confidence intervals
 mods <- cbind(AbsLat = c(0:70, 0:70), 
-              SeedAge= rep(log10(2449), 142),
-              altitude= rep(678, 142),
-              NorthTF= c(rep(T, 71), rep(F, 71)))
+              SeedAge= rep(log10(median(MSBP.CM$SeedAge)), 142),
+              altitude= rep(median(MSBP.CM$altitude), 142),
+              NorthTF= c(0:70, rep(F, 71)))
 
 ### calculate predicted values from model
 preds1 <- predict(CM.h, newmods=mods, addx=T)
@@ -145,8 +145,8 @@ ggsave(
   CM.plot,
   filename = "./Outputs/CVSE.tiff",
   units = "in",
-  width = 4,
-  height = 5,
+  width = 8,
+  height = 4,
   dpi = 1000,
   compression = 'lzw'
 )
