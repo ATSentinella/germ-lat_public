@@ -91,9 +91,9 @@ getWRC <- function() {
   
   #Plot of future WR with lat and hemisphere effect
   
-  WR.plot.c <- ggplot(data = MSBP.WR.data , aes(x = AbsLat)) +
+  WR.plot.c <- ggplot(data = MSBP.WR.data , aes(x = Grid.Lat)) +
     geom_rect(aes(
-      xmin = 0,
+      xmin = -23.5,
       xmax = 23.5,
       ymax = Inf,
       ymin = -Inf
@@ -104,55 +104,65 @@ getWRC <- function() {
     geom_hline(aes(yintercept = 0), size = 0.5) +
     theme_classic() +
     ylab(expression(
-      "2070 Environmental Temperature - \n Maximum Germination Temperature   "(degree * C)
+      "Current Environmental Temperature - \n Maximum Germination Temperature   "(degree * C)
     )) +
     xlab(expression("Absolute Latitude "(degree))) +
     theme(legend.position = "none",
           plot.margin = margin(10,10,10,30))+
     ylim (-45,15)+
-    scale_x_continuous(limits = c(0,60), expand = c(0,0))
+    scale_x_continuous(limits = c(-55,65), expand = c(0,0))
   
   WR.plot.c
   
   
   #Values to get confidence intervals
-  mods <- cbind(AbsLat = c(1:57), 
-                SeedAge = rep(log10(median(MSBP.WR.data$SeedAge, na.rm =T)), 57), 
-                altitude= rep(median(MSBP.WR.data$altitude, na.rm =T), 57))
+  mods <- cbind(AbsLat = c(0:70, 0:70), 
+                SeedAge= rep(log10(median(MSBP.WR.data$SeedAge, na.rm = T)), 142),
+                altitude= rep(median(MSBP.WR.data$altitude), 142),
+                NorthTF= c(0:70, rep(FALSE, 71)))
   
   ### calculate predicted values from model
-  preds1 <- predict(WR, newmods=mods, addx=T)
+  preds1 <- predict(WR.h, newmods=mods, addx=T)
   
-  preds1
-  
-  ci.plot1 <-as.data.frame(cbind(c(seq(1, 57)), 
-                                 preds1[[1]], 
-                                 preds1[[3]], 
-                                 preds1[[4]]))
+  ci.plot1 <- as.data.frame(
+    cbind(c(0:70, 0:(-70)), 
+          preds1[[1]],
+          preds1[[3]], 
+          preds1[[4]]))
   
   #Plot original figure with confidence intervals from above
-  WR.plot.c.ci <-
-    WR.plot.c +
-    geom_line(data = filter(ci.plot1, V1 > -55),
+  WR.plot.c.ci <-  WR.plot.c +
+    geom_line(data = filter(ci.plot1, V1 > -52 & V1 < 1),
               aes(x = V1, y = V2),
               colour = "red",
-              linetype = "solid") +
-    geom_line(data = filter(ci.plot1, V1 > -55),
+              linetype = "solid") + #South
+    geom_line(data = filter(ci.plot1, V1 > -52 & V1 < 1),
               aes(x = V1, y = V3),
-              linetype = "dashed") +
-    geom_line(data = filter(ci.plot1, V1 > -55),
+              linetype = "dashed") + #South
+    geom_line(data = filter(ci.plot1, V1 > -52 & V1 < 1),
               aes(x = V1, y = V4),
-              linetype = "dashed") +
+              linetype = "dashed") + #South
+    geom_line(data = filter(ci.plot1, V1 > -1 & V1 < 65),
+              aes(x = V1, y = V2),
+              colour = "red",
+              linetype = "solid") + #North
+    geom_line(data = filter(ci.plot1, V1 > -1 & V1 < 65),
+              aes(x = V1, y = V3),
+              linetype = "dashed") + #North
+    geom_line(data = filter(ci.plot1, V1 > -1 & V1 < 65),
+              aes(x = V1, y = V4),
+              linetype = "dashed") + #North
     xlab("Latitude (°)")
   
   WR.plot.c.ci
+  
   
   ggsave(
     WR.plot.c.ci,
     filename = "./Outputs/WRSE_current.tiff",
     units = "in",
-    width = 7,
-    height = 5,
+    width = 8,
+    height = 4,
     dpi = 1000,
     compression = 'lzw')
   
