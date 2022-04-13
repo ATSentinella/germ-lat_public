@@ -89,9 +89,9 @@ getCMF <- function() {
     data = MSBP.CM.phy[[1]]
   )
   
-  CM.plot <- ggplot(data = MSBP.CM , aes(x = AbsLat)) +
+  CM.plot <- ggplot(data = MSBP.CM , aes(x = Grid.Lat)) +
     geom_rect(aes(
-      xmin = 0, xmax = 23.5,
+      xmin = -23.5, xmax = 23.5,
       ymax = Inf, ymin = -Inf
     ), fill = "grey90") +
     geom_point(aes(y = Future.Hot.Quart - Topt.upp, 
@@ -108,43 +108,59 @@ getCMF <- function() {
     xlab(expression("Absolute Latitude "(degree))) +
     theme(legend.position = "none",
           plot.margin = margin(10, 10, 10, 30)) +
-    ylim (-35, 15) +
-    scale_x_continuous(limits = c(0, 60), expand = c(0, 0))
+    ylim (-20, 20) +
+    scale_x_continuous(limits = c(-60, 60), expand = c(0, 0))
+  
+  CM.plot
+  
+ 
   
   #Values to get confidence intervals
-  mods <- cbind(AbsLat = c(1:57), 
-                SeedAge = rep(log10(median(MSBP.CM$SeedAge, na.rm =T)), 57),
-                altitude= rep(median(MSBP.CM$altitude, na.rm =T), 57)) #abslat - 1 to 57
+  mods <- cbind(AbsLat = c(0:70, 0:70), 
+                SeedAge= rep(log10(median(MSBP.CM$SeedAge, na.rm = T)), 142),
+                altitude= rep(median(MSBP.CM$altitude), 142),
+                NorthTF= c(0:70, rep(FALSE, 71)))
   
   ### calculate predicted values from model
-  preds1 <- predict(CM, newmods=mods, addx=T)
+  preds1 <- predict(CM.h, newmods=mods, addx=T)
   
   ci.plot1 <- as.data.frame(
-    cbind(c(seq(1, 57)), 
-          preds1[[1]], 
+    cbind(c(0:70, 0:(-70)), 
+          preds1[[1]],
           preds1[[3]], 
           preds1[[4]]))
   
   #Plot original figure with confidence intervals from above
   CM.plot.f.ci <-  CM.plot +
-    geom_line(data = filter(ci.plot1, V1 > -55),
+    geom_line(data = filter(ci.plot1, V1 > -52 & V1 < 1),
               aes(x = V1, y = V2),
               colour = "orange",
-              linetype = "solid") +
-    geom_line(data = filter(ci.plot1, V1 > -55),
+              linetype = "solid") + #South
+    geom_line(data = filter(ci.plot1, V1 > -52 & V1 < 1),
               aes(x = V1, y = V3),
-              linetype = "dashed") +
-    geom_line(data = filter(ci.plot1, V1 > -55),
+              linetype = "dashed") + #South
+    geom_line(data = filter(ci.plot1, V1 > -52 & V1 < 1),
               aes(x = V1, y = V4),
-              linetype = "dashed") +
+              linetype = "dashed") + #South
+    geom_line(data = filter(ci.plot1, V1 > -1 & V1 < 65),
+              aes(x = V1, y = V2),
+              colour = "orange",
+              linetype = "solid") + #North
+    geom_line(data = filter(ci.plot1, V1 > -1 & V1 < 65),
+              aes(x = V1, y = V3),
+              linetype = "dashed") + #North
+    geom_line(data = filter(ci.plot1, V1 > -1 & V1 < 65),
+              aes(x = V1, y = V4),
+              linetype = "dashed") + #North
     xlab("Latitude (°)")
   
+  CM.plot.f.ci
   ggsave(
   CM.plot.f.ci,
   filename = "./Outputs/CVSE_future.tiff",
   units = "in",
-  width = 7,
-  height = 5,
+  width = 8,
+  height = 4,
   dpi = 1000,
   compression = 'lzw')
 
